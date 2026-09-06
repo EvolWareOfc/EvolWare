@@ -1,30 +1,50 @@
 local placeId = game.PlaceId
-local gameId  = game.GameId
+local gameId = game.GameId
 
-local map = {
-
-	[82797688803922] = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/82797688803922.lua",
-	[98629859043211] = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/98629859043211.lua",
-    [99078474560152] = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/98629859043211.lua",
+local GAMES = {
+    [82797688803922] = "82797688803922.lua",
+    [98629859043211] = "98629859043211.lua",
+    [99078474560152] = "98629859043211.lua",
 }
 
-local url = map[placeId] or map[gameId] or map[tostring(placeId)] or map[tostring(gameId)]
+local BASE_URL = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/"
 
-if url and url ~= "" then
-	local ok, body = pcall(function()
-		return game:HttpGet(url)
-	end)
+local file = GAMES[placeId] or GAMES[gameId]
 
-	if ok and body then
-		local fn, err = loadstring(body)
-		if fn then
-			fn()
-		else
-			warn("[Evol-Ware Loader Error]: " .. tostring(err))
-		end
-	else
-		warn("[Evol-Ware Loader Fetch Error]: " .. tostring(body))
-	end
-else
-	warn("[Evol-Ware] Unsupported game (PlaceId: " .. tostring(placeId) .. ")")
+local function log(icon, message)
+    print(string.format("[Evol-Ware] %s %s", icon, message))
 end
+
+if not file then
+    log("✕", "Unsupported game [" .. placeId .. "]")
+    return
+end
+
+local url = BASE_URL .. file
+
+log("→", "Loading...")
+
+local success, source = pcall(function()
+    return game:HttpGet(url)
+end)
+
+if not success or type(source) ~= "string" or source == "" then
+    log("✕", "Failed to fetch script")
+    return
+end
+
+local success, fn = pcall(loadstring, source)
+
+if not success or not fn then
+    log("✕", "Failed to compile script")
+    return
+end
+
+local success, err = pcall(fn)
+
+if not success then
+    log("✕", "Script error: " .. tostring(err))
+    return
+end
+
+log("✓", "Loaded successfully")
