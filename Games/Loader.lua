@@ -5,6 +5,8 @@ local GAMES = {
     [82797688803922] = "82797688803922.lua",
     [98629859043211] = "98629859043211.lua",
     [99078474560152] = "98629859043211.lua",
+    [14776071100]    = "14776071100.lua",
+    [14776084615]    = "14776071100.lua",
 }
 
 local BASE_URL = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/"
