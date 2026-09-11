@@ -1,52 +1,34 @@
-local placeId = game.PlaceId
-local gameId = game.GameId
-
 local GAMES = {
     [82797688803922] = "82797688803922.lua",
     [98629859043211] = "98629859043211.lua",
     [99078474560152] = "98629859043211.lua",
     [14776071100]    = "14776071100.lua",
     [14776084615]    = "14776071100.lua",
+    [127943464865693] = "127943464865693.lua",
+    [90477253860739]  = "127943464865693.lua",
 }
 
 local BASE_URL = "https://raw.githubusercontent.com/EvolWareOfc/EvolWare/refs/heads/main/Games/"
 
-local file = GAMES[placeId] or GAMES[gameId]
-
-local function log(icon, message)
-    print(string.format("[Evol-Ware] %s %s", icon, message))
-end
+local file = GAMES[game.PlaceId] or GAMES[game.GameId]
 
 if not file then
-    log("✕", "Unsupported game [" .. placeId .. "]")
+    warn("[Evol-Ware] Unsupported game:", game.PlaceId)
     return
 end
 
-local url = BASE_URL .. file
+local source = game:HttpGet(BASE_URL .. file)
 
-log("→", "Loading...")
-
-local success, source = pcall(function()
-    return game:HttpGet(url)
-end)
-
-if not success or type(source) ~= "string" or source == "" then
-    log("✕", "Failed to fetch script")
+if not source or source == "" then
+    warn("[Evol-Ware] Failed to fetch script")
     return
 end
 
-local success, fn = pcall(loadstring, source)
+local EvolError = loadstring(source)
 
-if not success or not fn then
-    log("✕", "Failed to compile script")
+if not EvolError then
+    warn("[Evol-Ware] Failed to compile script")
     return
 end
 
-local success, err = pcall(fn)
-
-if not success then
-    log("✕", "Script error: " .. tostring(err))
-    return
-end
-
-log("✓", "Loaded successfully")
+EvolError()
